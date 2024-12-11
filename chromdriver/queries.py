@@ -1,8 +1,12 @@
-def filter_query(cursor, price_threshold):
-    cursor.execute("SELECT * FROM Automobiles WHERE Price > ?", (price_threshold,))
-    return cursor.fetchall()
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+from .models import Automobile, Order
 
-def aggregate_query(cursor):
-    cursor.execute("SELECT AVG(Price) as AveragePrice FROM Automobiles")
-    row = cursor.fetchone()
-    return row.AveragePrice
+def filter_automobiles_by_price(db: Session, min_price: float):
+    return db.query(Automobile).filter(Automobile.price > min_price).all()
+
+def aggregate_average_price(db: Session):
+    return db.query(func.avg(Automobile.price)).scalar()
+
+def join_automobiles_and_orders(db: Session):
+    return db.query(Automobile, Order).join(Order, Automobile.id == Order.automobile_id).all()
